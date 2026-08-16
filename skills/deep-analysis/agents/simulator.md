@@ -44,6 +44,8 @@ model: sonnet
 > A. 引用 GitHub 代码(repo URL + 文件路径 + 行号)
 > B. 显式标注"LLM 推测,未验证"
 
+#* 查证门(防跳过): 遗漏清单每条必须带来源标签——要么 `repo@文件:行号`,要么显式「未查码=推测」。两者皆非 → 不合格,立即回查 GitHub,不得带过。
+
 就这一条。不堆 schema,不堆 bias_check,不堆 tipping_condition。
 
 ---

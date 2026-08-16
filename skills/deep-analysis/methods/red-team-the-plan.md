@@ -77,6 +77,8 @@ Incentive: returns and downside-protection; pattern-matches to failures. Attacks
 3. **For each attack, force an honest verdict:** ✅ we have a solid answer (write it) / 🟨 weak answer (note the gap) / 🔴 no answer (this is a finding).
 4. **Collect every 🔴 and 🟨 into the "unanswered attacks" list** — ranked by how likely the real audience is to raise it × how badly it lands.
 4b. ⚠️ **Every 🔴/🟨 attack → look up how mature open-source projects solve it** (via `search_github` / `read_github_file`, or `gh search repos` / `curl` when MCP is down). Pull the concrete counter / architecture / fallback into the response column, annotated with `repo+file`; only fall back to inference when no implementation exists. This is "after surfacing the attack, re-check GitHub for the fix" — don't write a first-pass answer and call it done.
+#* 查证门(防跳过): 🔴/🟨 攻击的 Response 列必须带来源——要么 `repo@文件:行号`,要么显式「未查码=推测」。两者皆非 → 不合格,立即回查 GitHub,不得带过。
+
 5. **Decide a response for each:** fix the plan, pre-empt it in the materials, prepare a rebuttal, or accept-and-disclose it. Walking into the room with a prepared answer to your three worst attacks is the deliverable.
 
 ## What good output looks like
