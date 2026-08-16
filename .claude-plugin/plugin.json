@@ -1,0 +1,24 @@
+{
+  "name": "deep-analysis",
+  "description": "深度需求分析全家桶:单条 /deep-analysis <需求> 跑完 3 闸门(需求理解/方向+模拟+可行性/报告) + 可选对抗 red-team + PRD 产出。内置 researcher/simulator/reporter 子代理与 pre-mortem/red-team 方法论。零外部依赖。",
+  "version": "1.0.0",
+  "author": {
+    "name": "suyu-creator",
+    "email": ""
+  },
+  "keywords": [
+    "deep-analysis",
+    "requirement-analysis",
+    "prd",
+    "red-team",
+    "feasibility",
+    "research"
+  ],
+  "skills": [
+    "skills/deep-analysis"
+  ],
+  "tools": [],
+  "hooks": {},
+  "mcp": [],
+  "commands": []
+}
