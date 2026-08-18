@@ -1,6 +1,6 @@
 ---
 name: deep-analysis
-description: 深度需求分析。单命令 /deep-analysis <需求> 走完 需求澄清→GitHub调研+模拟→可行性整合→可选对抗→PRD 输出。内置 researcher/simulator 2 子代理并行。触发:复杂/多模块/需调研的功能。简单需求(单页面/单接口/改文案)不触发。
+description: 深度需求分析。单命令 /deep-analysis <需求> 走完 需求澄清→GitHub调研+模拟→可行性整合→可选对抗→PRD 输出。内置 researcher/simulator 2 阶段。触发:复杂/多模块/需调研的功能。简单需求(单页面/单接口/改文案)不触发。
 argument-hint: <需求描述>
 ---
 
@@ -24,10 +24,15 @@ argument-hint: <需求描述>
 ```
 /deep-analysis <需求>
   ├─ Step 1  需求澄清(1-2 问 → 锁定范围)── 用户确认
-  ├─ Step 2  researcher ⟂ simulator 并行调研
-  ├─ Step 3  可行性整合(主 Agent 直接输出)── 用户确认
-  ├─ 可选    对抗 red-team(用户 decide)
-  └─ Step 4  输出 PRD.md(标注每个模块复用来源)
+  ├─ Step 2  researcher → simulator 顺序执行
+  │          ┌──────────────┐  ┌──────────────┐
+  │          │ researcher   │→ │  simulator   │
+  │          │ GitHub 调研   │  │ 遗漏扫描+风险 │
+  │          └──────────────┘  └──────────────┘
+  ├─ Step 3  可行性整合(主 Agent 直接输出)── 收尾必问: 方向 OK? 要不要跑对抗?
+  ├─ Step 3.5 对抗 red-team(用户选「跑」才执行)
+  └─ Step 4  输出 PRD.md(前置: 必须已确认对抗决策)
+        ⤴ 任意时刻冒出新需求 → 暂停，按硬规则 4 处理
 ```
 
 ## Step 1: 需求澄清
@@ -45,18 +50,18 @@ argument-hint: <需求描述>
 }
 ```
 
-## Step 2: 调研 + 模拟（并行 spawn）
+## Step 2: 调研 + 模拟（顺序执行）
 
-基于 phase0，**并行 spawn 两个子代理**：
+基于 phase0，主 Agent 顺序执行两个阶段（不 spawn 子代理，产物留在对话内传递）：
 
-- **researcher** — 用 `github-code-rag` MCP 搜 GitHub 同类项目，产出复用候选清单。Spawn an Agent using the prompt from `agents/researcher.md`，传入 phase0。
-- **simulator** — 模拟实现过程，主动发现遗漏。Spawn an Agent using the prompt from `agents/simulator.md`，传入 phase0。
+- **researcher** — Read `stages/researcher.md`，GitHub 调研同类项目，产出复用候选清单
+- **simulator** — Read `stages/simulator.md`，基于 phase0 + researcher 产物，模拟实现过程扫遗漏
 
-两者都只依赖 phase0，互不依赖，并行跑。
+顺序执行 → simulator 拿到 researcher 的复用候选再模拟，零重复搜索、信息充分。
 
 ## Step 3: 可行性整合
 
-两者返回后，主 Agent 直接整合输出：
+researcher + simulator 产物返回后，主 Agent 直接整合输出：
 
 ```
 ## 可行性整合
@@ -84,15 +89,27 @@ proceed / 改 / 转向 / kill
 
 HIGH 风险给应对方案，查 GitHub 找实证。
 
-展示后问用户：**"方向对吗？可行性 OK 吗？要不要跑对抗 red-team？"**
+⚠️ **Step 3 强制收尾问题（必须问，答完才进 Step 4）**——方向确认 + 对抗决策一次问完：
 
-## 可选: 对抗 red-team
+> **"方向对吗？可行性 OK 吗？要不要跑对抗 red-team？（跑 / 跳过）"**
+
+即使用户回答「直接下一步」/「确认」，**也必须追问对抗决策**（跑 / 跳过），得到明确回答后才进 Step 4。不问对抗就出 PRD = 违规。
+
+### Step 3.5: 对抗 red-team（在写 PRD 之前执行）
 
 用户选「对抗」时执行。扮演 6 个角色攻击方案：竞争者 / 愤怒客户 / CFO / 超负荷工程师 / 监管者 / 投资人。每个角色 3-6 条具体攻击。每条 🔴/🟨 攻击给解决方案，查 GitHub 找实证。输出未答复攻击清单按杀伤力排序。
+
+⚠️ **Step 3.5 强制收尾（必须问，答完才进 Step 4）**——汇报对抗结果后必须问：
+
+> **"对抗结果 OK 吗？要调整方案/范围吗？确认后我写 PRD。"**
+
+未得到用户明确确认就写 PRD = 违规。
 
 用户选「跳过」→ 直接进 Step 4。
 
 ## Step 4: 输出 PRD
+
+⚠️ **前置硬约束：必须在 Step 3 完成对抗决策询问（跑/跳过）、且 Step 3.5 对抗结果获用户确认之后才开始写 PRD**。未确认就写 PRD = 违规。
 
 写 `PRD.md` 文件，模板：
 
@@ -121,13 +138,14 @@ HIGH 风险给应对方案，查 GitHub 找实证。
 1. **复杂需求才触发** — 简单需求直接忽略
 2. **复用优先** — 先搜 GitHub，有现成直接引用，不从零想方案
 3. **每条声明标注来源** — GitHub 代码(repo@文件:行号) 或 「LLM 推测」
+4. **需求变更即停** — 任意时刻冒出新需求（流程中/PRD 后）：暂停 → 记录 → 评估影响 → 回退对应 Step（动范围→Step1、动方案→Step2-3、仅追加→PRD 需求池）→ 用户确认后继续。绝不默默按旧需求做到底
 
 ## 目录结构
 
 ```
 ~/.claude/skills/deep-analysis/
 ├── SKILL.md              # 本文件: 编排 + 4 Step + 可选对抗
-├── agents/
-│   ├── researcher.md      # 调研: GitHub 搜索 + 复用候选
-│   └── simulator.md       # 模拟: 遗漏扫描 + 风险
+└── stages/
+    ├── researcher.md      # 调研: GitHub 搜索 + 复用候选
+    └── simulator.md       # 模拟: 遗漏扫描 + 风险
 ```

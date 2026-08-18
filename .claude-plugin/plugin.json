@@ -1,7 +1,7 @@
 {
   "name": "deep-analysis",
-  "description": "深度需求分析:单条 /deep-analysis <需求> 走完 需求澄清→GitHub调研+模拟→可行性→PRD。内置 researcher/simulator 双代理并行，github-code-rag MCP 主力搜索。3 文件 ~8KB 极简轻量。",
-  "version": "2.0.0",
+  "description": "深度需求分析:单条 /deep-analysis <需求> 走完 需求澄清→GitHub调研+模拟→可行性→PRD。内置 researcher/simulator 2 阶段顺序执行 + 需求变更即停 + 对抗强制收尾。3 文件 ~8KB 极简轻量。",
+  "version": "2.1.0",
   "author": {
     "name": "suyu-creator",
     "email": ""

@@ -5,13 +5,13 @@
     "email": ""
   },
   "metadata": {
-    "description": "深度需求分析全家桶:3 闸门深度分析 + 可选对抗 red-team + PRD 产出。零外部依赖。",
-    "version": "1.0.0"
+    "description": "深度需求分析全家桶:3 闸门深度分析 + 可选对抗 red-team + PRD 产出。需求变更即停,零外部依赖。",
+    "version": "2.1.0"
   },
   "plugins": [
     {
       "name": "deep-analysis",
-      "description": "单命令 /deep-analysis <需求> 走完需求理解 → 方向+模拟+可行性 → 报告 → PRD 完整流程,含 researcher/simulator/reporter 子代理与 pre-mortem/red-team 方法论。面向复杂/多模块/需调研的新功能或系统。",
+      "description": "单命令 /deep-analysis <需求> 走完 需求澄清 → GitHub 调研 → 遗漏模拟 → 可行性 → PRD。researcher/simulator 2 阶段顺序执行,产物留对话去重。面向复杂/多模块/需调研的新功能或系统。",
       "source": "./",
       "strict": false,
       "skills": [

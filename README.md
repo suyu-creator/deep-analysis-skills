@@ -19,7 +19,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" /></a>
   <img src="https://img.shields.io/badge/Claude%20Code-native-purple?style=flat-square" alt="Claude Code Native" />
   <img src="https://img.shields.io/badge/files-3-lightgrey?style=flat-square" alt="3 files" />
-  <img src="https://img.shields.io/badge/version-2.0.0-orange?style=flat-square" alt="v2.0.0" />
+  <img src="https://img.shields.io/badge/version-2.1.0-orange?style=flat-square" alt="v2.1.0" />
 </p>
 
 <p align="center">
@@ -31,6 +31,15 @@
 
 ---
 
+## v2.1 变化
+
+v2.1 补上「需求变更处理」与「对抗强制收尾」两处流程闭环，文件数不变（仍 3 个 ~8KB）：
+
+- **需求变更即停**（硬规则 4）— 任意时刻冒出新需求（流程中/PRD 后）：暂停 → 记录 → 评估影响 → 回退对应 Step → 用户确认后继续。绝不默默按旧需求做到底。
+- **Step 3.5 强制收尾** — 对抗 red-team 跑完必须停下来问「对抗结果 OK 吗？要调整方案/范围吗？确认后我写 PRD」，未确认不写 PRD。
+
+---
+
 ## v2.0 变化
 
 v1.0 有 30+ 文件、250KB+ 流水线，太重了。v2.0 砍到 **3 个文件、~8KB**：
@@ -39,7 +48,7 @@ v1.0 有 30+ 文件、250KB+ 流水线，太重了。v2.0 砍到 **3 个文件�
 |---|---|---|
 | 文件数 | 30+ | **3** |
 | 总大小 | ~250KB | **~8KB** |
-| 子代理 | 3 (researcher/simulator/reporter) | **2** (researcher/simulator) |
+| 子代理/阶段 | 3 (researcher/simulator/reporter) | **2** (researcher/simulator, 顺序执行) |
 | PRD 产出 | 250KB 流水线 | **LLM 直接写文件** |
 | 对抗 | 独立 red-team 方法 | **内联可选** |
 | GitHub 搜索 | curl/gh CLI | **gh/curl 内置工具**，可选配 github-code-rag MCP 增强 |
@@ -49,7 +58,7 @@ v1.0 有 30+ 文件、250KB+ 流水线，太重了。v2.0 砍到 **3 个文件�
 
 ## 一句话介绍
 
-复杂需求走 `/deep-analysis <需求>`，AI 先调研 GitHub 同类项目 → 并行模拟发现遗漏 → 确认方向 → 输出 PRD.md（每个模块标注复用/改造/自研 + 来源）。
+复杂需求走 `/deep-analysis <需求>`，AI 先调研 GitHub 同类项目 → 再模拟发现遗漏 → 确认方向 → 输出 PRD.md（每个模块标注复用/改造/自研 + 来源）。
 
 ---
 
@@ -58,19 +67,20 @@ v1.0 有 30+ 文件、250KB+ 流水线，太重了。v2.0 砍到 **3 个文件�
 ```
 /deep-analysis <需求>
   ├─ Step 1  需求澄清(1-2 问 → 锁定范围)── 你确认
-  ├─ Step 2  researcher ⟂ simulator 并行
+  ├─ Step 2  researcher → simulator 顺序执行
   │          ┌──────────────┐  ┌──────────────┐
-  │          │ researcher   │  │  simulator   │
+  │          │ researcher   │→ │  simulator   │
   │          │ GitHub 调研   │  │ 遗漏扫描+风险 │
   │          └──────────────┘  └──────────────┘
   ├─ Step 3  可行性整合(复用候选 + 遗漏 + 死因自检)── 你确认
   ├─ 可选    对抗 red-team(6 角色攻击方案)── 你 decide
   └─ Step 4  输出 PRD.md(模块→复用/改造/自研 + 来源)
+        ⤴ 任意时刻冒出新需求 → 暂停，按硬规则 4 处理
 ```
 
 ### researcher — GitHub 调研
 
-搜 GitHub 同类项目，产出复用候选清单。**默认走 `gh` CLI / `curl` 内置工具**，无需任何外部依赖。如果你装了 `github-code-rag` MCP，子代理会自动走 MCP 获得更好的搜索体验。
+搜 GitHub 同类项目，产出复用候选清单。**默认走 `gh` CLI / `curl` 内置工具**，无需任何外部依赖。如果你装了 `github-code-rag` MCP，主 Agent 会自动优先走 MCP 获得更好的搜索体验。
 
 ### simulator — 遗漏扫描
 
@@ -98,9 +108,9 @@ cp -r skills/deep-analysis ~/.claude/skills/deep-analysis
 
 ### 可选增强：github-code-rag MCP
 
-本 skill **默认不依赖任何外部服务**。researcher/simulator 子代理用 Claude Code 内置工具（`gh` CLI、`curl`、WebSearch）完成 GitHub 搜索。
+本 skill **默认不依赖任何外部服务**。researcher/simulator 阶段用 Claude Code 内置工具（`gh` CLI、`curl`、WebSearch）完成 GitHub 搜索。
 
-如果你装了 [github-code-rag MCP](https://github.com/suyu-creator/github-code-rag-mcp)（独立项目，需单独安装），子代理会自动优先走 MCP 通道，获得本地索引、免限流、已读代码复用等增强能力。没装也完全能用。
+如果你装了 [github-code-rag MCP](https://github.com/suyu-creator/github-code-rag-mcp)（独立项目，需单独安装），主 Agent 会自动优先走 MCP 通道，获得更好的搜索体验。没装也完全能用。
 
 ### 使用
 
@@ -125,7 +135,7 @@ deep-analysis-skills/
 ├── skills/
 │   └── deep-analysis/
 │       ├── SKILL.md              # 编排: 4 Step + 可选对抗
-│       └── agents/
+│       └── stages/
 │           ├── researcher.md      # GitHub 调研 + 复用候选
 │           └── simulator.md       # 遗漏扫描 + 风险
 ├── README.md
@@ -142,6 +152,7 @@ deep-analysis-skills/
 1. **复杂需求才触发** — 简单需求直接忽略
 2. **复用优先** — 先搜 GitHub，有现成直接引用
 3. **每条声明标注来源** — GitHub 代码(repo@文件:行号) 或 「LLM 推测」
+4. **需求变更即停** — 任意时刻冒出新需求(流程中/PRD 后):暂停 → 记录 → 评估影响 → 回退对应 Step(动范围→Step1、动方案→Step2-3、仅追加→PRD 需求池) → 用户确认后继续。绝不默默按旧需求做到底
 
 ---
 
@@ -153,7 +164,9 @@ deep-analysis-skills/
 
 **为什么声明要标注来源？** 防止 AI 凭训练记忆瞎编。每条声明要么有真实代码锚点，要么显式标注「LLM 推测」。
 
-**能跳过对抗吗？** 可以。对抗是可选的，Step 3 确认后你 decide 跑不跑。
+**能跳过对抗吗？** 可以。对抗是可选的，Step 3 确认后你 decide 跑不跑。跑了的话，结果必须你确认后才写 PRD。
+
+**分析中途 / 出完 PRD 后又想改需求？** 直接说。硬规则 4「需求变更即停」：AI 会暂停 → 记录新需求 → 评估影响 → 回退对应 Step → 你确认后再继续，绝不默默按旧需求做到底。
 
 **分析结果存在哪？** 报告直接对话展示，PRD 写 `PRD.md` 文件落盘。
 

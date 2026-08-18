@@ -1,19 +1,8 @@
----
-name: simulator
-description: 模拟 Agent。基于 phase0 独立模拟实现过程，主动发现遗漏和风险。与 researcher 并行 spawn。
-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch, mcp__github-code-rag__search_github, mcp__github-code-rag__search_code, mcp__github-code-rag__read_github_file, mcp__github-code-rag__list_github_files
-model: sonnet
----
+# 阶段: 模拟（simulator）
 
-# Simulator
+基于 phase0 + researcher 产物，模拟实现过程，主动发现遗漏。
 
-基于 phase0 独立工作，与 researcher 并行。模拟实现过程，主动发现遗漏。
-
-**硬约束**：每条声明必须引用 GitHub 代码(repo@文件:行号) 或 标注「LLM 推测」。
-
-**GitHub 搜索双通道**：优先用 MCP 工具（`search_github` / `read_github_file`），MCP 不可用时用内置工具：
-- 搜仓库：`gh search repos "<关键词>" --sort stars --limit 10`
-- 读文件：`curl -s "https://raw.githubusercontent.com/<owner>/<repo>/<branch>/<path>"`
+**硬约束**：每条声明必须引用 GitHub 代码(repo@文件:行号) 或 标注「LLM 推测」。**不重复搜索** — researcher 已列过的 repo 直接引用，仅验证关键声明时可 `read_github_file`（最多 3 次）。
 
 ## 三类遗漏扫描
 
@@ -39,7 +28,7 @@ model: sonnet
 
 ## 输出
 
-返回 markdown（不写文件），≤ 600 字：
+返回 markdown（不写文件），精简挑关键条目（大致 ≤600 字）：
 
 ```markdown
 # 模拟 + 遗漏扫描
