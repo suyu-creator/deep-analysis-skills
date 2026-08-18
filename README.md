@@ -26,7 +26,7 @@
   <strong>复杂需求先调研、再模拟、后确认方向，最后输出能直接开工的 PRD。</strong><br/>
   一条 <code>/deep-analysis &lt;需求&gt;</code>，3 个文件，~8KB，极简轻量。<br/>
   <br/>
-  <em>内置 researcher + simulator 双代理并行，github-code-rag MCP 为主力搜索，gh/curl 兜底。</em>
+  <em>纯 markdown 文件，3 个文件 ~8KB。不内置任何 MCP，不依赖外部服务。</em>
 </p>
 
 ---
@@ -42,8 +42,8 @@ v1.0 有 30+ 文件、250KB+ 流水线，太重了。v2.0 砍到 **3 个文件�
 | 子代理 | 3 (researcher/simulator/reporter) | **2** (researcher/simulator) |
 | PRD 产出 | 250KB 流水线 | **LLM 直接写文件** |
 | 对抗 | 独立 red-team 方法 | **内联可选** |
-| GitHub 搜索 | curl/gh CLI | **github-code-rag MCP 主力** + gh/curl 兜底 |
-| 外部依赖 | 零依赖 | **github-code-rag MCP** (不强依赖，有兜底) |
+| GitHub 搜索 | curl/gh CLI | **gh/curl 内置工具**，可选配 github-code-rag MCP 增强 |
+| 外部依赖 | 零依赖 | **零依赖**（github-code-rag MCP 是可选增强，非必须） |
 
 ---
 
@@ -70,7 +70,7 @@ v1.0 有 30+ 文件、250KB+ 流水线，太重了。v2.0 砍到 **3 个文件�
 
 ### researcher — GitHub 调研
 
-用 `github-code-rag` MCP 搜 GitHub 同类项目，产出复用候选清单。优先 MCP，`gh`/`curl` 兜底。
+搜 GitHub 同类项目，产出复用候选清单。**默认走 `gh` CLI / `curl` 内置工具**，无需任何外部依赖。如果你装了 `github-code-rag` MCP，子代理会自动走 MCP 获得更好的搜索体验。
 
 ### simulator — 遗漏扫描
 
@@ -96,11 +96,11 @@ v1.0 有 30+ 文件、250KB+ 流水线，太重了。v2.0 砍到 **3 个文件�
 cp -r skills/deep-analysis ~/.claude/skills/deep-analysis
 ```
 
-### 前置：github-code-rag MCP
+### 可选增强：github-code-rag MCP
 
-本 skill 以 `github-code-rag` MCP 为主力搜索通道。未配置时自动降级为 `gh` CLI / `curl`。
+本 skill **默认不依赖任何外部服务**。researcher/simulator 子代理用 Claude Code 内置工具（`gh` CLI、`curl`、WebSearch）完成 GitHub 搜索。
 
-配置方式见 [github-code-rag-mcp](https://github.com/suyu-creator/github-code-rag-mcp)。
+如果你装了 [github-code-rag MCP](https://github.com/suyu-creator/github-code-rag-mcp)（独立项目，需单独安装），子代理会自动优先走 MCP 通道，获得本地索引、免限流、已读代码复用等增强能力。没装也完全能用。
 
 ### 使用
 
@@ -149,7 +149,7 @@ deep-analysis-skills/
 
 **简单需求会触发吗？** 不会。单页、单接口、改逻辑 — skill 直接忽略，给 1 句方案。
 
-**依赖什么？** 主力通道是 `github-code-rag` MCP，未配置时自动降级为 `gh` CLI / `curl`。不强依赖，但推荐配置以获得更好的搜索体验。
+**依赖什么？** 零外部依赖。本仓库只有 3 个 markdown 文件，不内置任何 MCP 或二进制。GitHub 搜索走 Claude Code 内置的 `gh` CLI / `curl`。`github-code-rag` MCP 是独立项目，可选安装，装了体验更好，不装也能正常用。
 
 **为什么声明要标注来源？** 防止 AI 凭训练记忆瞎编。每条声明要么有真实代码锚点，要么显式标注「LLM 推测」。
 
