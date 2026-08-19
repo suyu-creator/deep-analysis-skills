@@ -2,6 +2,18 @@
 
 > **分工**：前模拟 = 发现你不知道自己不知道的事。后模拟（闭环自检）= 验证计划覆盖了所有已知需求。
 
+## phase0（Step 1 产出，JSON 格式）
+
+```json
+{
+  "requirement": "<需求原文>",
+  "platform": "<平台>",
+  "scale": "<规模>",
+  "existing_code": "<greenfield / 已有项目路径>",
+  "anti_goal": "<明确不做哪些>"
+}
+```
+
 基于 phase0 + researcher 产物，模拟实现过程，主动发现遗漏。
 
 **硬约束**：每条声明必须引用 GitHub 代码(repo@文件:行号) 或 标注「LLM 推测」。**不重复搜索** — researcher 已列过的 repo 直接引用，仅验证关键声明时可 `read_github_file`（最多 3 次）。
