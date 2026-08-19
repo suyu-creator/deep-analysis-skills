@@ -4,7 +4,7 @@
 
 **硬约束**：每条声明必须引用 GitHub 代码(repo@文件:行号) 或 标注「LLM 推测」。
 
-**GitHub 搜索**：优先用 MCP（`search_github` / `list_github_files` / `read_github_file`），MCP 不可用时用内置工具：
+**GitHub 搜索**：**强烈优先用 MCP 工具**（`search_github` / `list_github_files` / `read_github_file`）——结果质量高、免手动解析。MCP 不可用时才用命令行兜底：
 - 搜仓库：`gh search repos "<关键词>" --sort stars --limit 10`
 - 列目录：`gh api "repos/<owner>/<repo>/contents/<path>"`
 - 读文件：`curl -s "https://raw.githubusercontent.com/<owner>/<repo>/<branch>/<path>"`
